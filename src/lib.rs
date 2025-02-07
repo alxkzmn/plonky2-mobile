@@ -33,3 +33,11 @@ fn verify_plonky2_proof(
     verifying_fn(&verifier_data_path, proof, inputs)
         .map_err(|e| MoproError::Plonky2Error(format!("error verifying proof: {}", e)))
 }
+
+fn deserialize_inputs(buffer: Vec<u8>) -> Vec<String> {
+    plonky2_fibonacci::deserialize_inputs(&buffer)
+}
+
+fn serialize_inputs(public_inputs: Vec<String>) -> Vec<u8> {
+    plonky2_fibonacci::serialize_inputs(&public_inputs)
+}

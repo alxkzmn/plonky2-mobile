@@ -4,6 +4,10 @@ namespace mopro {
 
   [Throws=MoproError]
   boolean verify_plonky2_proof(string verifier_data_path, bytes proof, bytes inputs);
+
+  bytes serialize_inputs(sequence<string> inputs);
+
+  sequence<string> deserialize_inputs(bytes inputs);
 };
 
 dictionary GenerateProofResult {

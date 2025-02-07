@@ -2,12 +2,15 @@ use std::{collections::HashMap, error::Error, str::FromStr};
 
 use num_bigint::BigUint;
 use plonky2::{
-    field::{goldilocks_field::GoldilocksField, types::Field},
+    field::{
+        goldilocks_field::GoldilocksField,
+        types::{Field, PrimeField},
+    },
     plonk::{
         circuit_data::{ProverCircuitData, VerifierCircuitData},
         proof::ProofWithPublicInputs,
     },
-    util::serialization::{DefaultGateSerializer, DefaultGeneratorSerializer, Write},
+    util::serialization::{Buffer, DefaultGateSerializer, DefaultGeneratorSerializer, Read, Write},
 };
 use plonky2::{
     iop::witness::{PartialWitness, WitnessWrite},
@@ -53,6 +56,35 @@ pub fn plonky2_prove(
         .unwrap();
 
     Ok((proof_buffer, public_inputs_buffer))
+}
+
+pub fn serialize_inputs(public_inputs: &Vec<String>) -> Vec<u8> {
+    const D: usize = 2;
+    type C = PoseidonGoldilocksConfig;
+    type F = <C as GenericConfig<D>>::F;
+    let mut public_inputs_buffer = Vec::new();
+    public_inputs_buffer
+        .write_usize(public_inputs.len())
+        .unwrap();
+    public_inputs_buffer
+        .write_field_vec(
+            &public_inputs
+                .iter()
+                .map(|x| F::from_noncanonical_biguint(BigUint::from_str(x).unwrap()))
+                .collect::<Vec<_>>(),
+        )
+        .unwrap();
+    public_inputs_buffer
+}
+
+pub fn deserialize_inputs(buffer: &[u8]) -> Vec<String> {
+    let mut buffer = Buffer::new(buffer);
+    let len = buffer.read_usize().unwrap();
+    let field_vec: Vec<GoldilocksField> = buffer.read_field_vec(len).unwrap();
+    field_vec
+        .iter()
+        .map(|x| x.to_canonical_biguint().to_string())
+        .collect()
 }
 
 pub fn plonky2_verify(

@@ -17,9 +17,18 @@ do {
   assert(!generateProofResult.proof.isEmpty, "Proof should not be empty")
   assert(!generateProofResult.inputs.isEmpty, "Inputs should not be empty")
 
+  let deserializedInputs = deserializeInputs(inputs: generateProofResult.inputs)
+  assert(deserializedInputs[0] == String(a), "Input a should be \(a)")
+  assert(deserializedInputs[1] == String(b), "Input a should be \(b)")
+
   let isValid = try verifyPlonky2Proof(
     verifierDataPath: vkPath, proof: generateProofResult.proof, inputs: generateProofResult.inputs)
   assert(isValid, "Proof verification should succeed")
+
+  let wrongInputs = serializeInputs(inputs: [String(a + 1), String(b)])
+  let isNegativeValid = try verifyPlonky2Proof(
+    verifierDataPath: vkPath, proof: generateProofResult.proof, inputs: wrongInputs)
+  assert(!isNegativeValid, "Proof verification should fail")
 
 
 } catch let error as MoproError {
