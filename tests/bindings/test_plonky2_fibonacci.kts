@@ -1,4 +1,4 @@
-import uniffi.mopro_bindings.*
+import uniffi.mopro.*
 
 try {
     val vkPath = "./zk-artifacts/plonky2_fibonacci_vk.bin"
