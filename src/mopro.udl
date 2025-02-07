@@ -1,0 +1,17 @@
+namespace mopro {
+  [Throws=MoproError]
+  GenerateProofResult generate_plonky2_proof(string prover_data_path, record<string, sequence<string>> inputs);
+
+  [Throws=MoproError]
+  boolean verify_plonky2_proof(string verifier_data_path, bytes proof, bytes inputs);
+};
+
+dictionary GenerateProofResult {
+  bytes proof;
+  bytes inputs;
+};
+
+[Error]
+enum MoproError {
+  "Plonky2Error"
+};

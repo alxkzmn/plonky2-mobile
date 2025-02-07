@@ -1,0 +1,33 @@
+[package]
+name = "plonky2-mobile"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "mopro_bindings"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "ios"
+
+[[bin]]
+name = "android"
+
+[dependencies]
+uniffi = "0.28.0"
+
+# Plonky2
+plonky2-fibonacci = { package = "plonky2-fibonacci", path = "./plonky2-fibonacci" }
+mopro-ffi = "0.1.1-alpha.0"
+thiserror = "2.0.3"
+
+[build-dependencies]
+uniffi = { version = "0.28.0", features = ["build"] }
+
+[dev-dependencies]
+uniffi = { version = "0.28.0", features = ["bindgen-tests"] }
+
+# remove after uniffi is upgraded (see https://github.com/mozilla/uniffi-rs/issues/2346)
+[lints.clippy]
+empty-line-after-doc-comments = "allow"
+
