@@ -2,6 +2,8 @@ uniffi::include_scaffolding!("mopro");
 
 use thiserror::Error;
 
+mod plonky2_fibonacci;
+
 #[derive(Debug, Error)]
 pub enum MoproError {
     #[error("Plonky2Error: {0}")]

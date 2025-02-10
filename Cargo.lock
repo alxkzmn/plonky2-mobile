@@ -734,19 +734,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "plonky2-fibonacci"
-version = "0.1.0"
-dependencies = [
- "num-bigint",
- "plonky2",
-]
-
-[[package]]
 name = "plonky2-mobile"
 version = "0.1.0"
 dependencies = [
  "mopro-ffi",
- "plonky2-fibonacci",
+ "num-bigint",
+ "plonky2",
  "thiserror 2.0.3",
  "uniffi",
 ]

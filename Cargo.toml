@@ -13,13 +13,15 @@ name = "ios"
 [[bin]]
 name = "android"
 
+[[bin]]
+name = "compile_circuit"
+
 [dependencies]
 uniffi = "0.28.0"
-
-# Plonky2
-plonky2-fibonacci = { package = "plonky2-fibonacci", path = "./plonky2-fibonacci" }
 mopro-ffi = "0.1.1-alpha.0"
 thiserror = "2.0.3"
+num-bigint = "0.4.6"
+plonky2 = "1.0.2"
 
 [build-dependencies]
 uniffi = { version = "0.28.0", features = ["build"] }
