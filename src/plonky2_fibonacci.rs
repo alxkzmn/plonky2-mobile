@@ -58,7 +58,7 @@ pub fn plonky2_prove(
     Ok((proof_buffer, public_inputs_buffer))
 }
 
-pub fn serialize_inputs(public_inputs: &Vec<String>) -> Vec<u8> {
+pub fn serialize_inputs(public_inputs: &[String]) -> Vec<u8> {
     const D: usize = 2;
     type C = PoseidonGoldilocksConfig;
     type F = <C as GenericConfig<D>>::F;
