@@ -53,8 +53,8 @@ fn main() -> Result<(), Error> {
     let verifier_data = circuit_data.verifier_data();
     let vk_bytes = verifier_data.to_bytes(&gate_serializer).unwrap();
 
-    std::fs::write("plonky2_fibonacci_pk.bin", pk_bytes)?;
-    std::fs::write("plonky2_fibonacci_vk.bin", vk_bytes)?;
+    std::fs::write("zk-artifacts/plonky2_fibonacci_pk.bin", pk_bytes)?;
+    std::fs::write("zk-artifacts/plonky2_fibonacci_vk.bin", vk_bytes)?;
 
     Ok(())
 }

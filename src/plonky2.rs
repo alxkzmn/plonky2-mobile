@@ -1,45 +1,41 @@
-use std::{collections::HashMap, error::Error, str::FromStr};
+use std::{error::Error, str::FromStr};
 
+use mopro_ffi::GenerateProofResult;
 use num_bigint::BigUint;
 use plonky2::{
     field::{
+        extension::Extendable,
         goldilocks_field::GoldilocksField,
         types::{Field, PrimeField},
     },
+    hash::hash_types::RichField,
     plonk::{
-        circuit_data::{ProverCircuitData, VerifierCircuitData},
+        circuit_data::{ProverCircuitData, ProverOnlyCircuitData, VerifierCircuitData},
         proof::ProofWithPublicInputs,
     },
-    util::serialization::{Buffer, DefaultGateSerializer, DefaultGeneratorSerializer, Read, Write},
+    util::serialization::{Buffer, GateSerializer, Read, WitnessGeneratorSerializer, Write},
 };
 use plonky2::{
-    iop::witness::{PartialWitness, WitnessWrite},
+    iop::witness::PartialWitness,
     plonk::config::{GenericConfig, PoseidonGoldilocksConfig},
 };
 
-pub type GenerateProofResult = (Vec<u8>, Vec<u8>);
-
-pub fn plonky2_prove(
+pub fn plonky2_prove<GTSer, GnSer, const D: usize, C, F: RichField + Extendable<D>>(
     prover_data_path: &str,
-    input: HashMap<String, Vec<String>>,
-) -> Result<GenerateProofResult, Box<dyn Error>> {
-    const D: usize = 2;
-    type C = PoseidonGoldilocksConfig;
-    type F = <C as GenericConfig<D>>::F;
-
-    let gate_serializer = DefaultGateSerializer;
-    let generator_serializer = DefaultGeneratorSerializer::<C, D>::default();
+    gate_serializer: &GTSer,
+    generator_serializer: &GnSer,
+    generate_witness: impl Fn(&ProverOnlyCircuitData<F, C, D>) -> PartialWitness<F>,
+) -> Result<GenerateProofResult, Box<dyn Error>>
+where
+    C: GenericConfig<D, F = F>,
+    GTSer: GateSerializer<F, D>,
+    GnSer: WitnessGeneratorSerializer<F, D>,
+{
     let pk_bytes = std::fs::read(prover_data_path)?;
+    let prover_data: ProverCircuitData<F, C, D> =
+        ProverCircuitData::from_bytes(&pk_bytes, gate_serializer, generator_serializer).unwrap();
 
-    let prover_data: ProverCircuitData<GoldilocksField, C, D> =
-        ProverCircuitData::from_bytes(&pk_bytes, &gate_serializer, &generator_serializer).unwrap();
-
-    let a = F::from_noncanonical_biguint(BigUint::from_str(&input["a"][0]).unwrap());
-    let b = F::from_noncanonical_biguint(BigUint::from_str(&input["b"][0]).unwrap());
-    // Provide initial values.
-    let mut pw = PartialWitness::new();
-    pw.set_target(prover_data.prover_only.public_inputs[0], a)?;
-    pw.set_target(prover_data.prover_only.public_inputs[1], b)?;
+    let pw = generate_witness(&prover_data.prover_only);
 
     let proof_with_public_inputs = prover_data.prove(pw)?;
 
@@ -55,7 +51,10 @@ pub fn plonky2_prove(
         .write_field_vec(&proof_with_public_inputs.public_inputs)
         .unwrap();
 
-    Ok((proof_buffer, public_inputs_buffer))
+    Ok(GenerateProofResult {
+        proof: proof_buffer,
+        inputs: public_inputs_buffer,
+    })
 }
 
 pub fn serialize_inputs(public_inputs: &[String]) -> Vec<u8> {
@@ -87,18 +86,20 @@ pub fn deserialize_inputs(buffer: &[u8]) -> Vec<String> {
         .collect()
 }
 
-pub fn plonky2_verify(
+pub fn plonky2_verify<GTSer, const D: usize, C, F: RichField + Extendable<D>>(
     verifier_data_path: &str,
     serialized_proof: Vec<u8>,
     serialized_inputs: Vec<u8>,
-) -> Result<bool, Box<dyn Error>> {
-    const D: usize = 2;
-    type C = PoseidonGoldilocksConfig;
-    let gate_serializer = DefaultGateSerializer;
+    gate_serializer: &GTSer,
+) -> Result<bool, Box<dyn Error>>
+where
+    C: GenericConfig<D, F = F>,
+    GTSer: GateSerializer<F, D>,
+{
     let vk_bytes = std::fs::read(verifier_data_path)?;
 
-    let verifier_data: VerifierCircuitData<GoldilocksField, C, D> =
-        VerifierCircuitData::from_bytes(vk_bytes, &gate_serializer).unwrap();
+    let verifier_data: VerifierCircuitData<F, C, D> =
+        VerifierCircuitData::from_bytes(vk_bytes, gate_serializer).unwrap();
 
     let proof = ProofWithPublicInputs::from_bytes(
         [serialized_proof, serialized_inputs].concat(),

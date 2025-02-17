@@ -10,12 +10,12 @@ try {
     inputs["b"] = listOf("1")
 
     // Generate proof
-    var generateProofResult = generatePlonky2Proof(pkPath, inputs)
+    var generateProofResult = generateFibonacciProof(pkPath, inputs)
     assert(generateProofResult.proof.size > 0) { "Proof is empty" }
     assert(generateProofResult.inputs.size > 0) { "Inputs are empty" }
 
     // Verify proof
-    var isValid = verifyPlonky2Proof(vkPath, generateProofResult.proof, generateProofResult.inputs)
+    var isValid = verifyFibonacciProof(vkPath, generateProofResult.proof, generateProofResult.inputs)
     assert(isValid) { "Proof is invalid" }
 
 

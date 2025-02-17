@@ -14,14 +14,19 @@ name = "ios"
 name = "android"
 
 [[bin]]
-name = "compile_circuit"
+name = "compile_fibonacci_circuit"
+
+[[bin]]
+name = "compile_sha256_circuit"
 
 [dependencies]
 uniffi = "0.28.0"
 mopro-ffi = "0.1.1-alpha.0"
 thiserror = "2.0.3"
 num-bigint = "0.4.6"
-plonky2 = "1.0.2"
+plonky2 = { git = "https://github.com/alxkzmn/plonky2.git" }
+plonky2_sha256 = { git = "https://github.com/alxkzmn/plonky2-sha256.git" }
+plonky2_u32 = { git = "https://github.com/alxkzmn/plonky2-u32", branch= "sha-256" }
 
 [build-dependencies]
 uniffi = { version = "0.28.0", features = ["build"] }
