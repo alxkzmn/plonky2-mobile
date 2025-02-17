@@ -4,3 +4,4 @@ build/
 MoproAndroidBindings/
 MoproiOSBindings/
 
+zk-artifacts/plonky2_sha256_pk.bin
