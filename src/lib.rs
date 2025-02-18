@@ -77,7 +77,7 @@ fn generate_sha256_proof() -> Result<GenerateProofResult, MoproError> {
     const D: usize = 2;
     type C = PoseidonGoldilocksConfig;
     type F = <C as GenericConfig<D>>::F;
-    let mut builder = CircuitBuilder::<F, D>::new(CircuitConfig::standard_recursion_config());
+    let mut builder = CircuitBuilder::<F, D>::new(CircuitConfig::standard_recursion_zk_config());
     let targets = make_circuits(&mut builder, len as u64);
     let mut pw = PartialWitness::new();
 
@@ -116,7 +116,6 @@ fn generate_sha256_proof() -> Result<GenerateProofResult, MoproError> {
 }
 
 fn sha256_roundtrip_bench() -> Result<Vec<String>, MoproError> {
-    // Time every phase
     let start = std::time::Instant::now();
     let mut msg = vec![0; 128_usize];
     for (i, msg_byte) in msg.iter_mut().enumerate().take(127) {
@@ -128,7 +127,8 @@ fn sha256_roundtrip_bench() -> Result<Vec<String>, MoproError> {
     const D: usize = 2;
     type C = PoseidonGoldilocksConfig;
     type F = <C as GenericConfig<D>>::F;
-    let mut builder = CircuitBuilder::<F, D>::new(CircuitConfig::standard_recursion_config());
+    let mut builder = CircuitBuilder::<F, D>::new(CircuitConfig::standard_recursion_zk_config());
+    println!("msg_len_in_bits: {}", len as u64);
     let targets = make_circuits(&mut builder, len as u64);
     let mut pw = PartialWitness::new();
 
@@ -144,24 +144,19 @@ fn sha256_roundtrip_bench() -> Result<Vec<String>, MoproError> {
         }
     }
 
-    //End of the preparation phase
     let end = std::time::Instant::now();
-    let elapsed1 = (end - start).as_millis();
-    println!("Preparation phase: {:?}", end - start);
-    // Witness generation phase
+    let circuit_definition_phase = (end - start).as_millis();
+    println!("circuit_definition_phase: {:?}", circuit_definition_phase);
     let start = std::time::Instant::now();
     let data = builder.build_prover::<C>();
-    // End of the witness generation phase
     let end = std::time::Instant::now();
-    let elapsed2 = (end - start).as_millis();
-    println!("Witness generation phase: {:?}", end - start);
-    // Proof generation phase
+    let circuit_build_phase = (end - start).as_millis();
+    println!("circuit_build_phase: {:?}", circuit_build_phase);
     let start = std::time::Instant::now();
     let _proof_with_public_inputs = data.prove(pw).unwrap();
-    // End of the proof generation phase
     let end = std::time::Instant::now();
-    let elapsed3 = (end - start).as_millis();
-    println!("Proof generation phase: {:?}", end - start);
+    let witgen_and_proving_phase = (end - start).as_millis();
+    println!("witgen_and_proving_phase: {:?}", witgen_and_proving_phase);
     // let data = builder.build_verifier();
     // // Proof verification phase
     // let start = std::time::Instant::now();
@@ -172,9 +167,12 @@ fn sha256_roundtrip_bench() -> Result<Vec<String>, MoproError> {
     // println!("Proof verification phase: {:?}", end - start);
 
     let res = vec![
-        format!("Preparation phase: {:?}", elapsed1 / 1000),
-        format!("Witness generation phase: {:?}", elapsed2 / 1000),
-        format!("Proof generation phase: {:?}", elapsed3 / 1000),
+        format!(
+            "Circuit definition: {:?}s ",
+            circuit_definition_phase / 1000
+        ),
+        format!("Circuit build: {:?} s", circuit_build_phase / 1000),
+        format!("Witgen + proving: {:?} s", witgen_and_proving_phase / 1000),
         // format!("Proof verification phase: {:?}", elapsed4 / 1000),
     ];
     Ok(res)

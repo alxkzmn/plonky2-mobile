@@ -46,8 +46,8 @@ struct ContentView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            Button("Prove Plonky2", action: runPlonky2ProveAction).disabled(!isPlonky2ProveButtonEnabled).accessibilityIdentifier("provePlonky2")
-            Button("Verify Plonky2", action: runPlonky2VerifyAction).disabled(!isPlonky2VerifyButtonEnabled).accessibilityIdentifier("verifyPlonky2")
+            Button("Bench Plonky2 Sha256", action: runPlonky2ProveAction).disabled(!isPlonky2ProveButtonEnabled).accessibilityIdentifier("provePlonky2")
+            //Button("Verify Plonky2", action: runPlonky2VerifyAction).disabled(!isPlonky2VerifyButtonEnabled).accessibilityIdentifier("verifyPlonky2")
 
             ScrollView {
                 Text(textViewText)
@@ -72,19 +72,23 @@ extension ContentView {
             inputs["a"] = [String(a)]
             inputs["b"] = [String(b)]
             
-            let start = CFAbsoluteTimeGetCurrent()
+            //let start = CFAbsoluteTimeGetCurrent()
             
             // Generate Proof
-            let generateProofResult = try generateSha256Proof()
-            assert(!generateProofResult.proof.isEmpty, "Proof should not be empty")
+            let generateProofResult = try sha256RoundtripBench()
+            //assert(!generateProofResult.proof.isEmpty, "Proof should not be empty")
             
-            let end = CFAbsoluteTimeGetCurrent()
-            let timeTaken = end - start
+            //let end = CFAbsoluteTimeGetCurrent()
+            //let timeTaken = end - start
             
             // Store the generated proof and public inputs for later verification
-            generatedPlonky2Proof = generateProofResult
+            //generatedPlonky2Proof = generateProofResult
             
-            textViewText += "\(String(format: "%.3f", timeTaken))s 1️⃣\n"
+            textViewText += generateProofResult[0]//"\(String(format: "%.3f", timeTaken))s 1️⃣\n"
+            textViewText += "\n"
+            textViewText += generateProofResult[1]
+            textViewText += "\n"
+            textViewText += generateProofResult[2]
             
             isPlonky2VerifyButtonEnabled = true
         } catch {
