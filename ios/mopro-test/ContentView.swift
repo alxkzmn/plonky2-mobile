@@ -75,9 +75,8 @@ extension ContentView {
             let start = CFAbsoluteTimeGetCurrent()
             
             // Generate Proof
-            let generateProofResult = try generatePlonky2Proof(proverDataPath: proverDataPath, inputs: inputs)
+            let generateProofResult = try generateSha256Proof()
             assert(!generateProofResult.proof.isEmpty, "Proof should not be empty")
-            assert(!generateProofResult.inputs.isEmpty, "Inputs should not be empty")
             
             let end = CFAbsoluteTimeGetCurrent()
             let timeTaken = end - start
@@ -103,7 +102,7 @@ extension ContentView {
         do {
             let start = CFAbsoluteTimeGetCurrent()
             
-            let isValid = try verifyPlonky2Proof(
+            let isValid = try verifySha256Proof(
                 verifierDataPath: verifierDataPath, proof: proof.proof, inputs: proof.inputs)
             let end = CFAbsoluteTimeGetCurrent()
             let timeTaken = end - start

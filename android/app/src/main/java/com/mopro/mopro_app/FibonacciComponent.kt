@@ -11,8 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mopro.mopro_app.getFilePathFromAssets
 import uniffi.mopro.GenerateProofResult
-import uniffi.mopro.generatePlonky2Proof
-import uniffi.mopro.verifyPlonky2Proof
+import uniffi.mopro.generateSha256Proof
+import uniffi.mopro.verifySha256Proof
 
 @Composable
 fun FibonacciComponent() {
@@ -40,7 +40,7 @@ fun FibonacciComponent() {
                 Thread(
                     Runnable {
                         val startTime = System.currentTimeMillis()
-                        res = generatePlonky2Proof(proverDataPath, inputs)
+                        res = generateSha256Proof()
                         val endTime = System.currentTimeMillis()
                         provingTime = "proving time: " + (endTime - startTime).toString() + " ms"
                     }
@@ -51,7 +51,7 @@ fun FibonacciComponent() {
         Button(
             onClick = {
                 val startTime = System.currentTimeMillis()
-                valid = "valid: " + verifyPlonky2Proof(verifierDataPath, res.proof, res.inputs).toString()
+                valid = "valid: " + verifySha256Proof(verifierDataPath, res.proof, res.inputs).toString()
                 val endTime = System.currentTimeMillis()
                 verifyingTime = "verifying time: " + (endTime - startTime).toString() + " ms"
                 //output = "output: " + uniffi.mopro.toEthereumInputs(res.inputs)
